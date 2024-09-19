@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wythoff Game</title>
+  <title>前进的皇后</title>
   <style>
     body {
       background-color: #f0f4f8;
@@ -18,8 +18,8 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(8, 60px); /* 8列 */
-      grid-template-rows: repeat(8, 60px); /* 8行 */
+      grid-template-columns: repeat(8, 60px); /* 桌面默认使用固定大小 */
+      grid-template-rows: repeat(8, 60px);
       gap: 1px;
       margin-bottom: 20px;
     }
@@ -66,13 +66,7 @@
     .button-container {
       display: flex;
       gap: 15px;
-    }
-    
-    h1 {
-      font-size: 24px;
-      color: #333;
-      text-align: center;
-      margin-bottom: 20px;
+      justify-content: center;
     }
 
     button {
@@ -94,6 +88,30 @@
 
     button:active {
       transform: scale(0.95);
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* 小屏幕适配 */
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(8, 12vw); /* 小屏幕使用相对单位 */
+        grid-template-rows: repeat(8, 12vw);
+      }
+
+      h1 {
+        font-size: 6vw; /* 小屏幕标题字体稍大 */
+      }
+
+      button {
+        font-size: 5vw; /* 小屏幕下的按钮字体 */
+        padding: 8px 16px;
+      }
     }
   </style>
 </head>
@@ -276,6 +294,16 @@
       var target = event.target;
       if (target.classList.contains('square')) {
         target.classList.add('rightClicked');
+      }
+    });
+
+    // 触摸事件支持
+    document.addEventListener('touchstart', function(event) {
+      var target = event.target;
+      if (target.classList.contains('square')) {
+        var row = target.getAttribute('data-row');
+        var col = target.getAttribute('data-col');
+        target.classList.add('clicked');
       }
     });
   </script>
