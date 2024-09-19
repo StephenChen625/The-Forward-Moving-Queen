@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wythoff Game</title>
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 60px); /* 8列 */
+      grid-template-rows: repeat(8, 60px); /* 8行 */
+      gap: 1px;
+      margin-bottom: 20px;
+    }
+
+    .square {
+      background-color: white;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, transform 0.3s;
+      position: relative;
+    }
+
+    .square:hover {
+      transform: scale(1.05);
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .number {
+      font-size: 14px;
+      color: #333;
+      visibility: hidden; /* 隐藏数字 */
+    }
+
+    /* 高亮时半透明颜色叠加 */
+    .hoverHighlight {
+      background-color: rgba(255, 234, 167, 0.5); /* 半透明黄色 */
+      background-blend-mode: multiply; /* 混合模式 */
+      z-index: 1;
+    }
+
+    .clicked {
+      background-color: lightpink;
+      z-index: 0; /* 点击后的颜色放在底层 */
+    }
+
+    .rightClicked {
+      background-color: lightblue;
+      z-index: 0; /* 右键点击后的颜色放在底层 */
+    }
+
+    .button-container {
+      display: flex;
+      gap: 15px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      background-color: #74b9ff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.15);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    button:hover {
+      background-color: #0984e3;
+      box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <h1>前进的皇后</h1>
+  <div class="grid">
+    <!-- 网格生成，使用A-H列和1-8行 -->
+    <div class="square" data-row="8" data-col="A"><span class="number">(8,A)</span></div>
+    <div class="square" data-row="8" data-col="B"><span class="number">(8,B)</span></div>
+    <div class="square" data-row="8" data-col="C"><span class="number">(8,C)</span></div>
+    <div class="square" data-row="8" data-col="D"><span class="number">(8,D)</span></div>
+    <div class="square" data-row="8" data-col="E"><span class="number">(8,E)</span></div>
+    <div class="square" data-row="8" data-col="F"><span class="number">(8,F)</span></div>
+    <div class="square" data-row="8" data-col="G"><span class="number">(8,G)</span></div>
+    <div class="square" data-row="8" data-col="H"><span class="number">(8,H)</span></div>
+
+    <div class="square" data-row="7" data-col="A"><span class="number">(7,A)</span></div>
+    <div class="square" data-row="7" data-col="B"><span class="number">(7,B)</span></div>
+    <div class="square" data-row="7" data-col="C"><span class="number">(7,C)</span></div>
+    <div class="square" data-row="7" data-col="D"><span class="number">(7,D)</span></div>
+    <div class="square" data-row="7" data-col="E"><span class="number">(7,E)</span></div>
+    <div class="square" data-row="7" data-col="F"><span class="number">(7,F)</span></div>
+    <div class="square" data-row="7" data-col="G"><span class="number">(7,G)</span></div>
+    <div class="square" data-row="7" data-col="H"><span class="number">(7,H)</span></div>
+
+    <div class="square" data-row="6" data-col="A"><span class="number">(6,A)</span></div>
+    <div class="square" data-row="6" data-col="B"><span class="number">(6,B)</span></div>
+    <div class="square" data-row="6" data-col="C"><span class="number">(6,C)</span></div>
+    <div class="square" data-row="6" data-col="D"><span class="number">(6,D)</span></div>
+    <div class="square" data-row="6" data-col="E"><span class="number">(6,E)</span></div>
+    <div class="square" data-row="6" data-col="F"><span class="number">(6,F)</span></div>
+    <div class="square" data-row="6" data-col="G"><span class="number">(6,G)</span></div>
+    <div class="square" data-row="6" data-col="H"><span class="number">(6,H)</span></div>
+
+    <div class="square" data-row="5" data-col="A"><span class="number">(5,A)</span></div>
+    <div class="square" data-row="5" data-col="B"><span class="number">(5,B)</span></div>
+    <div class="square" data-row="5" data-col="C"><span class="number">(5,C)</span></div>
+    <div class="square" data-row="5" data-col="D"><span class="number">(5,D)</span></div>
+    <div class="square" data-row="5" data-col="E"><span class="number">(5,E)</span></div>
+    <div class="square" data-row="5" data-col="F"><span class="number">(5,F)</span></div>
+    <div class="square" data-row="5" data-col="G"><span class="number">(5,G)</span></div>
+    <div class="square" data-row="5" data-col="H"><span class="number">(5,H)</span></div>
+
+    <div class="square" data-row="4" data-col="A"><span class="number">(4,A)</span></div>
+    <div class="square" data-row="4" data-col="B"><span class="number">(4,B)</span></div>
+    <div class="square" data-row="4" data-col="C"><span class="number">(4,C)</span></div>
+    <div class="square" data-row="4" data-col="D"><span class="number">(4,D)</span></div>
+    <div class="square" data-row="4" data-col="E"><span class="number">(4,E)</span></div>
+    <div class="square" data-row="4" data-col="F"><span class="number">(4,F)</span></div>
+    <div class="square" data-row="4" data-col="G"><span class="number">(4,G)</span></div>
+    <div class="square" data-row="4" data-col="H"><span class="number">(4,H)</span></div>
+
+    <div class="square" data-row="3" data-col="A"><span class="number">(3,A)</span></div>
+    <div class="square" data-row="3" data-col="B"><span class="number">(3,B)</span></div>
+    <div class="square" data-row="3" data-col="C"><span class="number">(3,C)</span></div>
+    <div class="square" data-row="3" data-col="D"><span class="number">(3,D)</span></div>
+    <div class="square" data-row="3" data-col="E"><span class="number">(3,E)</span></div>
+    <div class="square" data-row="3" data-col="F"><span class="number">(3,F)</span></div>
+    <div class="square" data-row="3" data-col="G"><span class="number">(3,G)</span></div>
+    <div class="square" data-row="3" data-col="H"><span class="number">(3,H)</span></div>
+
+    <div class="square" data-row="2" data-col="A"><span class="number">(2,A)</span></div>
+    <div class="square" data-row="2" data-col="B"><span class="number">(2,B)</span></div>
+    <div class="square" data-row="2" data-col="C"><span class="number">(2,C)</span></div>
+    <div class="square" data-row="2" data-col="D"><span class="number">(2,D)</span></div>
+    <div class="square" data-row="2" data-col="E"><span class="number">(2,E)</span></div>
+    <div class="square" data-row="2" data-col="F"><span class="number">(2,F)</span></div>
+    <div class="square" data-row="2" data-col="G"><span class="number">(2,G)</span></div>
+    <div class="square" data-row="2" data-col="H"><span class="number">(2,H)</span></div>
+
+    <div class="square" data-row="1" data-col="A"><span class="number">(1,A)</span></div>
+    <div class="square" data-row="1" data-col="B"><span class="number">(1,B)</span></div>
+    <div class="square" data-row="1" data-col="C"><span class="number">(1,C)</span></div>
+    <div class="square" data-row="1" data-col="D"><span class="number">(1,D)</span></div>
+    <div class="square" data-row="1" data-col="E"><span class="number">(1,E)</span></div>
+    <div class="square" data-row="1" data-col="F"><span class="number">(1,F)</span></div>
+    <div class="square" data-row="1" data-col="G"><span class="number">(1,G)</span></div>
+    <div class="square" data-row="1" data-col="H"><span class="number">(1,H)</span></div>
+  </div>
+
+  <div class="button-container">
+    <button id="toggleButton">显示坐标</button>
+    <button id="modeButton">逆推模式</button>
+  </div>
+
+  <script>
+    var toggleButton = document.getElementById('toggleButton');
+    var numbersVisible = false;
+
+    toggleButton.addEventListener('click', function() {
+      var numbers = document.querySelectorAll('.number');
+      if (numbersVisible) {
+        numbers.forEach(function(number) {
+          number.style.visibility = 'hidden';
+        });
+        toggleButton.textContent = '显示坐标'; // 切换回 "显示坐标"
+      } else {
+        numbers.forEach(function(number) {
+          number.style.visibility = 'visible';
+        });
+        toggleButton.textContent = '隐藏坐标'; // 切换为 "隐藏坐标"
+      }
+      numbersVisible = !numbersVisible;
+    });
+
+    var modeButton = document.getElementById('modeButton');
+    var mode = 2;
+    modeButton.addEventListener('click', function() {
+      if (mode === 1) {
+        mode = 2;
+        modeButton.textContent = '逆推模式'; // 切换为 "逆推模式"
+      } else {
+        mode = 1;
+        modeButton.textContent = '正推模式'; // 切换为 "正推模式"
+      }
+    });
+
+    // 将列A-H转换为1-8
+    function colToNumber(col) {
+      return col.charCodeAt(0) - 'A'.charCodeAt(0) + 1;
+    }
+
+    // 鼠标移动事件监听器
+    document.addEventListener('mouseover', function(event) {
+      var target = event.target;
+      if (target.classList.contains('square')) {
+        var row = parseInt(target.getAttribute('data-row')); // 行数为数值
+        var col = colToNumber(target.getAttribute('data-col')); // 列转换为数值
+        var squares = document.querySelectorAll('.square');
+        squares.forEach(function(square) {
+          var squareRow = parseInt(square.getAttribute('data-row'));
+          var squareCol = colToNumber(square.getAttribute('data-col'));
+          
+          // 根据模式显示不同的方格
+          if (mode === 2) {
+            // 模式 2: 高亮左、下、左下的方格
+            if ((squareRow >= row && squareCol == col) || 
+                (squareCol >= col && squareRow == row) || 
+                (squareRow - squareCol == row - col && squareRow >= row && squareCol >= col)) {
+              square.classList.add('hoverHighlight');
+            }
+          } else if (mode === 1) {
+            // 模式 1: 高亮右、上、右上的方格
+            if ((squareRow <= row && squareCol == col) || 
+                (squareCol <= col && squareRow == row) || 
+                (squareRow - squareCol == row - col && squareRow <= row && squareCol <= col)) {
+              square.classList.add('hoverHighlight');
+            }
+          }
+        });
+      }
+    });
+
+    // 鼠标移出事件监听器
+    document.addEventListener('mouseout', function(event) {
+      var target = event.target;
+      if (target.classList.contains('square')) {
+        var squares = document.querySelectorAll('.square');
+        squares.forEach(function(square) {
+          square.classList.remove('hoverHighlight');
+        });
+      }
+    });
+
+    // 点击事件监听器
+    document.addEventListener('click', function(event) {
+      if (event.button === 0) {
+        var target = event.target;
+        if (target.classList.contains('square')) {
+          var row = parseInt(target.getAttribute('data-row')); // 行数为数值
+          var col = colToNumber(target.getAttribute('data-col')); // 列转换为数值
+          target.classList.add('clicked');
+        }
+      }
+    });
+
+    // 右键点击事件监听器
+    document.addEventListener('contextmenu', function(event) {
+      event.preventDefault(); // 阻止默认右键菜单
+      var target = event.target;
+      if (target.classList.contains('square')) {
+        target.classList.add('rightClicked');
+      }
+    });
+  </script>
+</body>
+</html>
